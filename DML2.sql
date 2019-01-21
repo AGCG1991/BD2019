@@ -72,4 +72,16 @@ from profesores p JOIN impartir i ON i.profesor=p.id JOIN asignaturas asig ON as
     --COMENTARIO B: Alternativa con JOIN
 
 
+--6º Nombre y edad de parejas de alumnos que tengan el mismo primer apellido.
 
+select a1.nombre "Alumno 1" , TRUNC(months_between(sysdate,a1.fecha_nacimiento)/12) "Edad 1", 
+a2.nombre "Alumno 2" , TRUNC(months_between(sysdate,a2.fecha_nacimiento)/12) "Edad 2"
+from alumnos a1,alumnos a2
+where UPPER(a1.apellido1)=UPPER(a2.apellido1) AND a1.dni<a2.dni;
+--7. Combinaciones de apellidos que se pueden obtener con los primeros apellidos de alumnos nacidos
+--entre los años 1995 y 1996, ambos incluidos. Se recomienda utilizar el operador BETWEEN … AND
+--para expresar el rango de valores.
+select a1.apellido1 apellido1, a2.apellido1 apellido2
+from alumnos a1,alumnos a2
+where (EXTRACT(year from a1.fecha_nacimiento) BETWEEN 1995 AND 1996) AND
+           (EXTRACT(year from a2.fecha_nacimiento) BETWEEN 1995 AND 1996) AND a1.dni<a2.dni;
