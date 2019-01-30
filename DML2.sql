@@ -242,4 +242,39 @@ MINUS (select a.codigo
 			from asignaturas a, impartir i, profesores p
 			where a.codigo=i.asignatura AND P.ID=I.PROFESOR);
 
-		   
+--17.Muestre todos los emails almacenados en la base de datos (tablas de Profesores y Alumnos). Si un
+--email aparece repetido en dos tablas distintas también deberá aparecer repetido en la consulta. Evite
+--los NULL.
+
+SELECT P.EMAIL FROM PROFESORES P 
+WHERE P.EMAIL IS NOT NULL 
+UNION ALL (SELECT A.EMAIL 
+FROM ALUMNOS A 
+WHERE A.EMAIL IS NOT NULL);
+
+
+--18.Utilice las operaciones de conjuntos para buscar alumnos que puedan ser familia de algún profesor, es
+--decir, su primer o segundo apellido es el mismo que el primer o segundo apellido de un profesor
+--aunque no necesariamente en el mismo orden. Muestre simplemente los apellidos comunes.
+
+
+(select p.apellido1
+from profesores p
+where p.apellido1 is not null
+union
+select p.apellido2
+from profesores p
+where p.apellido2 is not null)
+intersect
+(select a.apellido1
+from alumnos a
+where a.apellido1 is not null
+union
+select a.apellido2
+from alumnos a
+where a.apellido2 is not null);
+
+
+
+--****************OJO: SI QUIERO MIRAR LA SOLUCIÓN DE LA CONSULTA (LA VISTA) , USAMOS select * from sol_1_2 , DONDE EL PRIMER NÚMERO ES LA RELACIÓN Y EL SEGUNDO
+--				       EL NÚMERO DEL EJERCICIO.
