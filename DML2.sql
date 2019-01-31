@@ -230,7 +230,7 @@ FROM ASIGNATURAS ASIG
 JOIN DEPARTAMENTOS D ON (ASIG.DEPARTAMENTO=D.CODIGO) AND (CREDITOS IS NOT NULL) AND (PRACTICOS IS NOT NULL) AND (TEORICOS IS NOT NULL)
 ORDER BY  ROUND((ASIG.PRACTICOS*100)/CREDITOS,0)  DESC;
 
-
+--  ****************************** OPERACIONES DE CONJUNTOS *********************************************
 -- ///////////////////////////// (SELECT …) UNION/MINUS/INTERSECT (SELECT …)/////////////////////////////
 
 --16.Utilice las operaciones de conjuntos para extraer los códigos de las asignaturas que no son impartidas
@@ -273,6 +273,95 @@ union
 select a.apellido2
 from alumnos a
 where a.apellido2 is not null);
+
+--19 .Apellidos que contienen la letra elle ( 'll' ) tanto de alumnos como de profesores.
+select A.Apellido1 
+from Alumnos A
+WHERE upper(A.APELLIDO1) LIKE '%LL%'
+UNION 
+(select A.Apellido2 
+from Alumnos A
+WHERE UPPER(A.APELLIDO2) LIKE '%LL%')
+UNION 
+(select P.Apellido1
+from Profesores P
+WHERE UPPER(P.APELLIDO1) LIKE '%ll%')
+UNION
+(select P.Apellido2 
+from PROFESORES P
+WHERE UPPER(P.APELLIDO2) LIKE '%ll%');
+
+---20º Idem que la anterior pero sustituya la 'll' por una 'y'. Utilice REPLACE.
+select  replace(UPPER(A.APELLIDO1),'LL','Y')
+from Alumnos A
+WHERE upper(A.APELLIDO1) LIKE '%LL%'
+UNION 
+(select  replace(UPPER(A.APELLIDO2),'LL','Y')
+from Alumnos A
+WHERE UPPER(A.APELLIDO2) LIKE '%LL%')
+UNION 
+(select replace(UPPER(P.APELLIDO1),'%LL%','Y')
+from Profesores P
+WHERE UPPER(P.APELLIDO1) LIKE '%LL%')
+UNION
+(select  replace(UPPER(P.APELLIDO2),'%LL%','Y')
+from PROFESORES P
+WHERE UPPER(P.APELLIDO2) LIKE '%LL%');
+
+			--COMENTARIO A: replace (atributo,'Frase que buscar','Frase reemplazo')
+			--usamos el upper dentro de replace, pues hay apellidos que están en mayúsculas, así no discriminamos 
+			--OJO. NO CONCUERDA CON "select * from sol_2_20" , en la solución hay casos en los que no se modifica la LL
+
+-- *****************************              REUIONES EXTERNAS 							  ***************************		
+	
+-- ///////////////////////////// Select … from … a (LEFT/RIGHT) OUTER JOIN b … ON () where … /////////////////////////////
+
+--21.Busque una incongruencia en la base de datos, es decir, asignaturas en las que el número de créditos
+--teóricos + prácticos no sea igual al número de créditos totales. Muestre también los profesores que
+--imparten esas asignaturas.
+
+select A.nombre "Nombre Asignatura" , I.PROFESOR "PROFESOR"
+FROM ASIGNATURAS A LEFT OUTER JOIN IMPARTIR I
+ON (I.ASIGNATURA=A.CODIGO)
+WHERE (NVL(A.TEORICOS,0) +NVL(A.PRACTICOS,0)) !=NVL(A.CREDITOS,0);
+
+--LEFT OUTER, TRAE TODO LO DE LA TABLA IZQUIERDA (EN ESTE CASO ASIGNATURAS) Y TODO LOS DE LA DERECHA QUE CUMPLAN LA CONDICIÓN
+--USO NVL, si el valor no es nulo, nos devuelve expr1 obteniendo los créditos, en caso contrario nos da 0, si la suma entre 
+--los prácticos y los teóricos es diferente a los créditos (totales), entonces me los muestra
+
+--22.Muestre en orden alfabético los nombres completos de todos los profesores y a su lado el de sus
+--directores si es el caso (si no tenemos constancia de su director de tesis dejaremos este espacio en
+--blanco, pero el profesor debe aparecer en el listado).
+
+select P1.nombre ||' '|| P1.APELLIDO1 || ' ' || P1.APELLIDO2 "PROFESORES" , 
+nvl(P2.NOMBRE, ' ') || ' ' || NVL(P2.APELLIDO1, ' ') ||' '|| NVL(P2.APELLIDO2, ' ') "DIRECTORES DE TESIS"
+FROM PROFESORES P1 LEFT OUTER JOIN PROFESORES P2 ON P1.DIRECTOR_TESIS=P2.ID
+ORDER BY P1.APELLIDO1, P1.APELLIDO2 ,P1.NOMBRE  ;
+
+	--COMENTARIO A: En este caso, tenemos en cuenta que un profesor a su vez puede ser director de tesis de otro profesor
+	--por ello, hacemos una consulta reflexiva sobre profesores, seleccionamos todos los nombre de profesores (tabla izquierda) 
+	--y añadimos todos los profesores que cumplan la condición (QUE SU ID DE DIRECTOR DE TESIS COINCIDA CON EL ID DE PROFESOR) ,P1.DIRECTOR_TESIS=P2.ID
+	
+--23 º Muestre el nombre y apellidos de cada profesor junto con los de su director de tesis y el número de
+--tramos de investigación del director. Recuerde que el director de tesis de un profesor viene dado por
+--el atributo DIRECTOR_TESIS y el número de tramos se encuentra en la tabla INVESTIGADORES.
+--Los nombres de cada profesor y su director deben aparecer con el siguiente formato: 'El Director de
+--Angel Mora Bonilla es Manuel Enciso Garcia-Oliveros'.	
+
+
+	select ('El director de' ||' '|| p.nombre ||' '|| p.apellido1 ||' '|| p.apellido2 ||' es '|| 
+	NVL(d.nombre, ' ') ||' '|| NVL(d.apellido1, ' ') ||' '|| NVL(d.apellido2, ' ')) 
+	as TESIS, 
+	NVL(i.tramos, '0') tramos       
+	from profesores p, profesores d LEFT OUTER JOIN investigadores i ON i.id_profesor=d.id
+	where p.director_tesis=d.id
+	order by p.apellido1, p.apellido2;
+
+
+
+
+
+
 
 
 
