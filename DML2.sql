@@ -350,13 +350,64 @@ ORDER BY P1.APELLIDO1, P1.APELLIDO2 ,P1.NOMBRE  ;
 
 
 	select ('El director de' ||' '|| p.nombre ||' '|| p.apellido1 ||' '|| p.apellido2 ||' es '|| 
-	NVL(d.nombre, ' ') ||' '|| NVL(d.apellido1, ' ') ||' '|| NVL(d.apellido2, ' ')) 
-	as TESIS, 
+	NVL(d.nombre, ' ') ||' '|| NVL(d.apellido1, ' ') ||' '|| NVL(d.apellido2, ' ')) "TESIS", 
 	NVL(i.tramos, '0') tramos       
 	from profesores p, profesores d LEFT OUTER JOIN investigadores i ON i.id_profesor=d.id
 	where p.director_tesis=d.id
 	order by p.apellido1, p.apellido2;
 
+--24.Liste el nombre de todos los alumnos ordenados alfabéticamente. Si dicho alumno tuviese otro
+--alumno que se ha matriculado exactamente a la vez que él, muestre el nombre de este segundo
+---alumno a su lado.
+
+select ( A1.NOMBRE || ' '|| A1.APELLIDO1 ||' '|| A1.APELLIDO2 ) "ALUMNOS" ,( A2.NOMBRE || ' '|| A2.APELLIDO1 ||' '|| A2.APELLIDO2) "ALUMNOS 2" 
+FROM ALUMNOS A1
+LEFT OUTER JOIN  ALUMNOS A2 ON ( A1.FECHA_PRIM_MATRICULA=A2.FECHA_PRIM_MATRICULA) AND (A1.DNI != A2.DNI);
+
+--25.Listado con el nombre de todas las asignaturas. En caso de que exista, para cada asignatura se
+--muestra el curso, grupo y nombre y primer apellido del profesor que la imparte.
+
+select ASIG.NOMBRE, NVL(I.CURSO,' ') "CURSO" , NVL(I.GRUPO,' ') "GRUPO" , NVL(P.NOMBRE, ' ') || ' '|| NVL(P.APELLIDO1,' ') || ' '|| NVL(P.APELLIDO2, ' ') "PROFESORES"
+FROM ASIGNATURAS ASIG LEFT OUTER JOIN IMPARTIR I
+ON (ASIG.CODIGO=I.ASIGNATURA) 
+LEFT OUTER JOIN PROFESORES P ON (P.ID=I.PROFESOR);
+
+--  ****************************** SUBCONSULTAS  *********************************************
+-- ///////////////////////////// Select … from … where … (NOT) IN/EXISTS (select …) /////////////////////////////
+
+--26.Nombres e identificador de los profesores que no imparten grupo actualmente
+SELECT P.NOMBRE , P.ID
+FROM PROFESORES P
+WHERE P.ID NOT IN (SELECT P.ID FROM PROFESORES P JOIN IMPARTIR I ON P.ID=I.PROFESOR);
+
+		--COMENTARIO A: EN PRIMER LUGAR, HAGO UNA CONSULTA DE NOMBRE E ID DE LOS PROFESORES DENTRO DE LA TABLA PROFESORES
+		--Y LUEGO HAGO UNA SUBCONSULTA DONDE COMPRUEBO QUE EL ID DEL PROFESOR COINCIDE CON EL DE LOS PROFESORES QUE IMPARTE 
+		--(NO ESTAR EN IMPARTIR, SIGNIFICA QUE NO IMPARTE CLASES ACTUALMENTE), PUES ESTA CONSULTA LA NIEGO, PIDIENDO JUSTO LO CONTRARIO
+		
+	SELECT A.NOMBRE , A.APELLIDO1, A.APELLIDO2
+	FROM ALUMNOS A 
+	WHERE EXISTS (SELECT * FROM MATRICULAR M
+                WHERE A.DNI=M.ALUMNO AND A.GENERO='FEM' AND M.ASIGNATURA='115')
+                AND ROWNUM < 3;
+				
+				
+                --EXISTS conjunto_tuplas La expresión es cierta si el conjunto de tuplas no está vacío. Es decir, existe al menos una tupla en el conjunto.
+--28 Muestre todos los datos de los profesores que no son directores de tesis
+    
+select *
+from profesores p
+where p.id NOT IN (select p2.id
+                   	          from profesores p1 , profesores p2
+                                 where p1.director_tesis=p2.id);
+								 
+--29.Liste el nombre y código de las asignaturas que tienen en su mismo curso otra con más créditos que
+--ella
+
+select a.nombre, a.codigo from asignaturas a
+where (a.nombre in (select a.nombre 
+                    from asignaturas b 
+                    where NVL(b.creditos,0) > NVL(a.creditos,0) and NVL(a.curso,0)=NVL(b.curso,0)));
+								 
 
 
 
