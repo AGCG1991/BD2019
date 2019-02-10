@@ -384,6 +384,8 @@ WHERE P.ID NOT IN (SELECT P.ID FROM PROFESORES P JOIN IMPARTIR I ON P.ID=I.PROFE
 		--Y LUEGO HAGO UNA SUBCONSULTA DONDE COMPRUEBO QUE EL ID DEL PROFESOR COINCIDE CON EL DE LOS PROFESORES QUE IMPARTE 
 		--(NO ESTAR EN IMPARTIR, SIGNIFICA QUE NO IMPARTE CLASES ACTUALMENTE), PUES ESTA CONSULTA LA NIEGO, PIDIENDO JUSTO LO CONTRARIO
 		
+--27.Nombre y apellidos de 2 alumnas matriculadas de la asignatura de código 115 . Use ROWNUM para filtrar el número de tuplas que se desea (2 en este caso). 
+--Las tuplas repetidas deben filtrarse también.
 	SELECT A.NOMBRE , A.APELLIDO1, A.APELLIDO2
 	FROM ALUMNOS A 
 	WHERE EXISTS (SELECT * FROM MATRICULAR M
@@ -408,6 +410,17 @@ where (a.nombre in (select a.nombre
                     from asignaturas b 
                     where NVL(b.creditos,0) > NVL(a.creditos,0) and NVL(a.curso,0)=NVL(b.curso,0)));
 								 
+--30.Use las operaciones de conjuntos y la consulta anterior para mostrar las asignaturas que tienen el
+--máximo número de créditos de su curso.
+select a.nombre,a.codigo
+from asignaturas a
+
+minus 
+
+select a.nombre, a.codigo from asignaturas a
+where (a.nombre in (select a.nombre 
+                    from asignaturas b 
+                    where NVL(b.creditos,0) > NVL(a.creditos,0) and NVL(a.curso,0)=NVL(b.curso,0)))
 
 
 
