@@ -85,7 +85,7 @@ where antiguedad < TO_DATE('01/01/1990', 'DD/MM/YYYY');
 --función MONTHS_BETWEEN).
 select nombre, apellido1, apellido2,fecha_nacimiento
 from profesores
-where months_between(sysdate,to_char(fecha_nacimiento))/12 > 30;
+where months_between(sysdate,(fecha_nacimiento))/12 > 30;
 
 --11. .Liste en mayúsculas el nombre y dos apellidos de los profesores que tienen más de 3 trienios. A un profesor se
 --le concede un trienio cuando cumple tres años desde su ingreso. Pero si lleva 8 años y 11 meses solo tiene 2
@@ -121,10 +121,9 @@ where caracter like 'O_';
 
 --14.Informe de los alumnos que se han matriculado hace menos de dos meses
 
-select * from alumnos;
 
 select Nombre, Apellido1 , Apellido2 from Alumnos
-where (months_between (sysdate, fecha_prim_matricula)/12) <=2 ;
+where (months_between (sysdate, fecha_prim_matricula)) <=2 ;
 
 --15º Informe de los alumnos que entraron en la Universidad con menos de 18 años.
 select Nombre, Apellido1, Apellido2 from Alumnos

@@ -153,7 +153,10 @@ AND AS1.CODIGO <AS2.CODIGO AND AS1.CODIGO<AS3.CODIGO AND AS2.CODIGO<AS3.CODIGO;
 
 
 -- ///////////////////////////// REUNION DE TABLAS + ORDEN /////////////////////////////
-
+--11.Muestre el nombre, apellidos, nombre de la asignatura y las notas obtenidas por todos lo alumnos con
+--más de 22 años. Utilice la función DECODE para mostrar la nota como (Matricula de Honor,
+--Sobresaliente, Notable, Aprobado, Suspenso o No Presentado). Ordene por apellidos y nombre del
+--alumno.
 select A1.nombre, A1.apellido1, A1.apellido2, ASIG.Nombre "NOMBRE ASIGNATURA" , M.CALIFICACION "NOTAS"
 FROM ALUMNOS A1 
 JOIN MATRICULAR M ON (A1.DNI=M.ALUMNO) AND (TRUNC(MONTHS_BETWEEN(SYSDATE,FECHA_NACIMIENTO)/12,0) > 22)
