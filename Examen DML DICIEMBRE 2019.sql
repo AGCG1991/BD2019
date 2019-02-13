@@ -40,4 +40,6 @@ group by NOMBRE, APELLIDO1, APELLIDO2;
 select distinct al.nombre, apellido1, apellido2, asig.nombre from profesores al
 left outer join impartir on profesor =id left outer join asignaturas asig on asignatura = codigo
 where apellido1 like '%á%';
+--Si NO HAGO EL LEFT OUTER JOIN, no muestro los profesores que cumple con la condición de que contengan la 'á' PERO que no imparten clase.
+--CON LEFT OUTER JOIN, muestro TODOS los profesores y los que cumpla la condición en impartir
 

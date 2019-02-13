@@ -24,11 +24,19 @@ select AG.nombre, AG.codigo, nvl(to_char(AG.practicos), ' No tiene ' ) "Crédito
 from alumnos AL, asignaturas AG 
 where AL.Nombre ='Nicolas' and AL.apellido1='Bersabe' and AL.apellido2='Alba'
 order by AG.Codigo asc;
-
-    --COMENTARIO: El funcionamiento de la función NVL(expr1, expr2) que devuelve expr1 siempre que ésta no sea nula y expr2 en caso contrario
+ --COMENTARIO: El funcionamiento de la función NVL(expr1, expr2) que devuelve expr1 siempre que ésta no sea nula y expr2 en caso contrario
     --Verificamos que el nombre y los dos apellidos sean los dados en el enunciado, desde la tabla alumnos. Como tenemos que mirar el contenido
     --de codigo, alojado en la tabla asignatura, usamos AG.codigo.
     --Si la asignatura no tiene créditos prácticos, devolverá un "no tiene"
+
+select DISTINCT ASIG.codigo "ASIGNATURA" ,  ASIG.nombre "NOMBRE" ,nvl(to_char(ASIG.PRACTICOS),'No tiene') "Créditos Prácticos"
+from asignaturas ASIG , ALUMNOS A, MATRICULAR M
+where M.ALUMNO=A.DNI AND M.ASIGNATURA=ASIG.CODIGO AND
+upper(A.nombre)='NICOLAS' AND UPPER(A.apellido1)='BERSABE' AND UPPER(A.APELLIDO2)='ALBA';
+		--La solución buena, es la 2º. Tenemos que comprobar que el Nicolas, está matriculado en la asignatura , además, como no se hace diferencia de años
+		--puede que el alumno haya estado matriculado anteriormente,porl o que usamos distinct para que no salga repeticiones
+
+   
     
 --3 Para cada profesor perteneciente al departamento “Ingenieria de Comunicaciones”, proporcione el
 --número de semanas completas que lleva trabajando en el departamento y diga que día se cumple un
@@ -57,11 +65,11 @@ and upper(D.nombre) like 'INGENIERIA DE COMUNICACIONES';
         
 -- 4. Alumnos que tengan aprobada la asignatura 'Bases de Datos'.
 
+select A.Dni,A.Nombre, A.apellido1, A.apellido2, A.genero, A.direccion, A.telefono, A.email, A.fecha_nacimiento, A.fecha_prim_matricula
+from alumnos A, matricular M, asignaturas asig
+where a.dni=m.alumno and asig.codigo=m.asignatura and upper(asig.nombre)='BASES DE DATOS'
+AND M.CALIFICACION !='SP';
 
-select AL.Nombre, AL.Apellido1, AL.Apellido2 
-from alumnos AL, matricular M, asignaturas A
-where (( AL.DNI=M.ALUMNO) and (M.asignatura=A.codigo) AND upper(A.nombre)='BASES DE DATOS') 
-and M.CALIFICACION!='SP';
         --COMENTARIO B: En este caso, suponemos que no tenemos conocimiento del código de asignatura y debemos de hacer mas comprobaciones
         --como la de que el M.asignatura=A.codigo , además debemos de comprobar de que el nombre de la asignatura es BASES DE DATOS
         --adicionalmente, comprobamos que nos muestre todas las calificaciones excepto SP que se trata de los suspensos
@@ -165,18 +173,12 @@ ORDER BY A1.APELLIDO1, A1.APELLIDO2, A1.NOMBRE;
 			--COMENTARIO A: SIN FUNCIÓN DECODE
 				--CONCATENAMOS UNIONES BAJO UNA RESTRICCIÓN ALUMNOS A1 JOIN MATRICULAR M ON CONDICIONES
 
-select A1.nombre, A1.apellido1, A1.apellido2, ASIG.Nombre "NOMBRE ASIGNATURA" , 
-DECODE(m.calificacion, 
-                             'MH', 'Matrícula de honor',
-                             'SB', 'Sobresaliente', 
-                             'NT', 'Notable',  
-                             'AP', 'Aprobado',
-                             'SP', 'Suspenso',
-                             null, 'No presentado') "NOTAS"
-FROM ALUMNOS A1 
-JOIN MATRICULAR M ON (A1.DNI=M.ALUMNO) AND (TRUNC(MONTHS_BETWEEN(SYSDATE,FECHA_NACIMIENTO)/12,0) > 22)
-JOIN ASIGNATURAS ASIG ON (M.ASIGNATURA=ASIG.CODIGO) 
-ORDER BY A1.APELLIDO1 , A1.APELLIDO2, A1.NOMBRE;
+select A.NOMBRE, A.APELLIDO1, A.APELLIDO2, ASIG.NOMBRE , 
+NVL( DECODE(M.CALIFICACION,'MH','Matricula de Honor','SB','Sobresaliente','NT','Notable','AP','Aprobado','SP','Suspenso','NP','No Presentado'), 'No presentado')
+FROM  ASIGNATURAS ASIG JOIN MATRICULAR M ON (ASIG.CODIGO=M.ASIGNATURA) 
+JOIN ALUMNOS A ON M.ALUMNO=A.DNI 
+AND (MONTHS_BETWEEN(SYSDATE,A.FECHA_NACIMIENTO)/12)>22;
+
 		--COMENTARIO B: CON FUNCIÓN DECODE , LA IDEA ES QUE EN VEZ DE MOSTRAR SU ACORTAMIENTO, MUESTRE LA PALABRA COMPLETA 
 		
 		
@@ -288,11 +290,11 @@ WHERE UPPER(A.APELLIDO2) LIKE '%LL%')
 UNION 
 (select P.Apellido1
 from Profesores P
-WHERE UPPER(P.APELLIDO1) LIKE '%ll%')
+WHERE UPPER(P.APELLIDO1) LIKE '%LL%')
 UNION
 (select P.Apellido2 
 from PROFESORES P
-WHERE UPPER(P.APELLIDO2) LIKE '%ll%');
+WHERE UPPER(P.APELLIDO2) LIKE '%LL%');
 
 ---20º Idem que la anterior pero sustituya la 'll' por una 'y'. Utilice REPLACE.
 select  replace(UPPER(A.APELLIDO1),'LL','Y')
@@ -393,7 +395,7 @@ WHERE P.ID NOT IN (SELECT P.ID FROM PROFESORES P JOIN IMPARTIR I ON P.ID=I.PROFE
 	FROM ALUMNOS A 
 	WHERE EXISTS (SELECT * FROM MATRICULAR M
                 WHERE A.DNI=M.ALUMNO AND A.GENERO='FEM' AND M.ASIGNATURA='115')
-                AND ROWNUM < 3;
+                AND ROWNUM < 3; --OJO, EL ROWNUM debe estar fuera de la consulta
 				
 				
                 --EXISTS conjunto_tuplas La expresión es cierta si el conjunto de tuplas no está vacío. Es decir, existe al menos una tupla en el conjunto.
